@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🚀 TaskMaster - Premium Full-Stack Todo App
 
 TaskMaster is a modern, full-stack task management application built with a stunning **Glassmorphism** dark UI. It features real-time database synchronization, robust state management, and a custom beautiful interface designed to provide a premium user experience.
@@ -93,3 +94,6 @@ This application is optimized for Vercel deployment:
 
 ---
 Built with ❤️ using Next.js & Supabase.
+=======
+
+>>>>>>> 44dc82963dc53ce4a25ece2242741e12c9f00f34

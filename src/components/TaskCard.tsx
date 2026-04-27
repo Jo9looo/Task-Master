@@ -11,6 +11,7 @@ export interface Task {
   priority: Priority;
   createdAt: number;
   due_date?: string | null;
+  project_id?: string | null;
 }
 
 interface TaskCardProps {

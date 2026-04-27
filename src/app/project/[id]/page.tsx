@@ -1,60 +1,54 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
-import TaskCard, { Priority } from "@/components/TaskCard";
+import TaskCard from "@/components/TaskCard";
 import TaskInput from "@/components/TaskInput";
 import { useStore } from "@/store/useStore";
-import { Loader2 } from "lucide-react";
+import { Loader2, Hash } from "lucide-react";
 
-export default function Home() {
-  const { tasks, user, loading, fetchInitialData, addTask, toggleTask, deleteTask } = useStore();
+export default function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
+  const { tasks, projects, user, loading, fetchInitialData, addTask, toggleTask, deleteTask } = useStore();
   const router = useRouter();
 
   useEffect(() => {
     fetchInitialData();
   }, [fetchInitialData]);
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
-    }
-  }, [user, loading, router]);
-
   if (loading) {
     return (
       <div className="h-full flex flex-col items-center justify-center text-foreground/50">
         <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
-        <p>Loading your tasks...</p>
       </div>
     );
   }
 
   if (!user) return null;
 
-  // General tasks only (where project_id is null)
-  const generalTasks = tasks.filter(t => !t.project_id);
-  const activeTasks = generalTasks.filter(t => !t.completed);
-  const completedTasks = generalTasks.filter(t => t.completed);
+  const project = projects.find(p => p.id === id);
+  if (!project) return <div className="p-12 text-center text-foreground/50 text-xl font-semibold">Project not found</div>;
+
+  const projectTasks = tasks.filter(t => t.project_id === id);
+  const activeTasks = projectTasks.filter(t => !t.completed);
+  const completedTasks = projectTasks.filter(t => t.completed);
 
   return (
     <div className="max-w-4xl mx-auto p-8 lg:p-12">
       <header className="mb-10">
         <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-          General Tasks
-          <span className="text-sm font-medium text-foreground/50 bg-foreground/10 px-3 py-1 rounded-lg">
-            {new Date().toLocaleDateString('id-ID', { weekday: 'long', month: 'long', day: 'numeric' })}
-          </span>
+          <Hash style={{ color: project.color_accent }} className="w-8 h-8" />
+          {project.name}
         </h1>
       </header>
       
       <main>
-        <TaskInput onAdd={(title, priority, dueDate) => addTask(title, priority, dueDate)} />
+        <TaskInput onAdd={(title, priority, dueDate) => addTask(title, priority, dueDate, project.id)} />
 
         <div className="space-y-10">
           <div>
             <h2 className="text-lg font-semibold text-foreground/80 mb-4 flex items-center gap-2">
-              My Tasks
+              Tasks
               <span className="bg-primary/20 text-primary text-xs px-2 py-1 rounded-md">
                 {activeTasks.length}
               </span>
@@ -63,7 +57,7 @@ export default function Home() {
               <AnimatePresence mode="popLayout">
                 {activeTasks.length === 0 ? (
                   <div className="text-center py-12 glass-panel rounded-2xl border-dashed">
-                    <p className="text-foreground/40">No active tasks. You're all caught up! 🎉</p>
+                    <p className="text-foreground/40">No tasks in this project yet.</p>
                   </div>
                 ) : (
                   activeTasks.map(task => (
@@ -83,9 +77,6 @@ export default function Home() {
             <div>
               <h2 className="text-lg font-semibold text-foreground/50 mb-4 flex items-center gap-2">
                 Completed
-                <span className="bg-foreground/10 text-foreground/50 text-xs px-2 py-1 rounded-md">
-                  {completedTasks.length}
-                </span>
               </h2>
               <div className="space-y-3 opacity-80">
                 <AnimatePresence mode="popLayout">
